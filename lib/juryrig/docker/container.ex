@@ -13,8 +13,7 @@ defmodule Juryrig.Docker.Container do
 
   @spec create(any) :: {:error, any} | {:ok, any}
   def create(map) do
-    Client.post("/containers/create", map)
-    |> case do
+    case Client.post("/containers/create", map) do
       {:ok, %HTTPoison.Response{status_code: 201, body: %{"Id" => id}}} -> {:ok, id}
       {:ok, %HTTPoison.Response{body: %{"message" => message}}} -> {:error, message}
     end
