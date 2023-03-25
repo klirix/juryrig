@@ -31,6 +31,7 @@ defmodule Juryrig.Docker.Container do
     end
   end
 
+  @spec delete(binary, any) :: :ok | {:error, any}
   def delete(id, options \\ %{}) when is_binary(id) do
     query = URI.encode_query(options)
 
@@ -41,6 +42,20 @@ defmodule Juryrig.Docker.Container do
 
       {:ok, %HTTPoison.Response{status_code: code} = res} when code >= 400 and code < 500 ->
         {:error, res.body["message"]}
+    end
+  end
+
+  @spec stop_and_cleanup(binary) :: :ok | {:error, binary()}
+  def stop_and_cleanup(id) when is_binary(id) do
+    case stop(id) do
+      :ok ->
+        case delete(id, %{"v" => true, "force" => true}) do
+          :ok -> :ok
+          {:error, message} -> {:error, "Failed to cleanup container: #{message}"}
+        end
+
+      {:error, message} ->
+        {:error, "Failed to stop container: #{message}"}
     end
   end
 end
